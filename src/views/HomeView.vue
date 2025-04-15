@@ -14,7 +14,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <router-link class="nav-link" to="/login">Admin</router-link>
+              <router-link class="nav-link" to="/">Admin</router-link>
             </li>
           </ul>
         </div>

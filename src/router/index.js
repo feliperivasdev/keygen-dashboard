@@ -8,12 +8,12 @@ const routes = [
   {
     path: "/",
     name: "home",
-    component: HomeView,
+    component: LoginView,
   },
   {
-    path: "/login",
-    name: "Login",
-    component: LoginView,
+    path: "/gen",
+    name: "gen",
+    component: HomeView,
   },
   {
     path: "/admin",

@@ -14,7 +14,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <router-link class="nav-link" to="/"
+              <router-link class="nav-link" to="/gen"
                 >Volver a Productos</router-link
               >
             </li>

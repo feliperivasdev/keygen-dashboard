@@ -7,7 +7,7 @@
             class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
           >
             <h3 class="mb-0">Panel de Administración</h3>
-            <button @click="logout" class="btn btn-light btn-sm">
+            <button @click="handleLogout" class="btn btn-light btn-sm">
               Cerrar Sesión
             </button>
           </div>
@@ -49,12 +49,17 @@
                     </td>
                     <td>
                       <button
-                        @click="toggleStatus(product)"
-                        class="btn btn-sm"
-                        :class="product.active ? 'btn-danger' : 'btn-success'"
+                        @click="triggerFileInput(product.id)"
+                        class="btn btn-sm btn-primary"
                       >
-                        {{ product.active ? "Desactivar" : "Activar" }}
+                        Cambiar Imagen
                       </button>
+                      <input
+                        type="file"
+                        :id="'file-input-' + product.id"
+                        class="d-none"
+                        @change="handleImageChange($event, product)"
+                      />
                     </td>
                   </tr>
                 </tbody>
@@ -69,6 +74,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import axios from "axios";
 
 export default {
   name: "AdminDashboard",
@@ -79,37 +85,59 @@ export default {
     ...mapActions("products", ["fetchProducts", "toggleProductStatus"]),
     ...mapActions("auth", ["logout"]),
 
-    async toggleStatus(product) {
+    async handleLogout() {
       try {
-        await this.toggleProductStatus({
-          productId: product.id,
-          active: !product.active,
-        });
-
-        this.$swal({
-          icon: "success",
-          title: "Actualizado",
-          text: `El producto "${product.name}" ha sido ${
-            !product.active ? "activado" : "desactivado"
-          }.`,
-          timer: 1500,
-        });
+        await this.logout();
+        this.$router.push("/");
       } catch (error) {
-        this.$swal({
-          icon: "error",
-          title: "Error",
-          text: "No se pudo actualizar el estado del producto.",
-        });
+        alert("Error al cerrar sesión.");
       }
     },
 
-    async handleLogout() {
-      await this.logout();
-      this.$router.push("/login");
+    triggerFileInput(productId) {
+      const fileInput = document.getElementById(`file-input-${productId}`);
+      if (fileInput) {
+        fileInput.click();
+      }
+    },
+
+    async handleImageChange(event, product) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("productId", product.id.replace("product-", "")); // Enviar solo el número del ID
+
+      try {
+        // Enviar la imagen al backend PHP
+        const response = await axios.post(
+          "https://generadorespromax.com.bospley.com//upload.php",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        // Actualizar la URL de la imagen en el producto
+        product.imageUrl = response.data.imageUrl;
+
+        alert(`La imagen del producto "${product.name}" ha sido actualizada.`);
+      } catch (error) {
+        alert("Error al actualizar la imagen del producto.");
+      }
     },
   },
   created() {
-    this.fetchProducts();
+    // Cargar productos desde localStorage si existen
+    const storedProducts = JSON.parse(localStorage.getItem("products"));
+    if (storedProducts) {
+      this.allProducts = storedProducts;
+    } else {
+      this.fetchProducts();
+    }
   },
 };
 </script>
